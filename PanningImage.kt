@@ -114,3 +114,47 @@ fun PanningImage(
     <string name="asking_wizard_for_funny_messages">Asking Wizard for funny messages</string>
     <string name="encrypting_secret_herbs_and_spices">encrypting secret herbs and spices</string>
 
+    //the connecting piece in main with some other state handling
+
+       //end of navgraph
+                        }
+                        Column {
+                            when (uiState) {
+                                is UiState.InProgress -> {
+                                    //Render loading state
+                                    LaunchedEffect(uiState) {
+                                        viewModel.displayLoadingDialogWithMessages()
+                                    }
+                                    //Loading screen dialog with images that cycle
+                                    images.getOrNull(currentImageIndex)?.let {
+                                        LoadingDialog(
+                                            message = loadingMessage,
+                                            imageResource = it
+                                        )
+                                    }
+                                    Log.d("UiState:Main", "In Progress")
+                                }
+
+                                is UiState.SignedIn -> {
+                                    Log.d("UiState:Main", "In Signed In")
+                                    LaunchedEffect(viewModel.userManager.hasUpdatedProfile.value) {
+                                        //if hasUpdatedProfile != true, displayFinishSetupDialog
+                                        if (!viewModel.userManager.hasUpdatedProfile.value) {
+                                            Log.d(
+                                                "UiState:Main",
+                                                "hasUpdatedProfile returned false"
+                                            )
+                                            viewModel.displayFinishSetupD()
+                                        } else {
+                                            //this will auto navigate user off of the splash screen
+                                            //plan to include the privacy police elsewhere to allow acces to it.
+                                            if (currentAppUser?.email?.isNotBlank() == true
+                                                && currentScreen.contentEquals(Destinations.Splash.title)
+                                            ) {
+                                                viewModel.navigateToPantry()
+                                            }
+                                        }
+                                    }
+
+                                }
+
