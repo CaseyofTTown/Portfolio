@@ -102,3 +102,94 @@ fun MainRecipeCollection(
         }
     }
 }
+
+//the card it is displaying
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.skydoves.landscapist.glide.GlideImage
+import jones.software.myPantryJournal.R
+import jones.software.myPantryJournal.model.Recipe
+import jones.software.myPantryJournal.sealedClasses.UiState
+import kotlin.math.min
+
+
+@Composable
+fun RecipeCard(
+    recipe: Recipe,
+    onRecipeSelected: (Recipe) -> Unit,
+    modifier: Modifier = Modifier,
+    uiState: UiState,
+) {
+    Box(modifier = modifier) {
+        Card(
+            modifier = Modifier
+                .padding(16.dp)
+                .clickable { onRecipeSelected(recipe) },
+            elevation = CardDefaults.cardElevation(8.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                // Card title
+                Text(
+                    text = recipe.recipeName,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                val imageModifier = Modifier
+                    .height(200.dp)
+                    .fillMaxWidth()
+                    .clip(shape = RoundedCornerShape(8.dp))
+                recipe.photoUrl?.let {
+                    GlideImage(
+                        imageModel = it,
+                        contentDescription = "Image for ${recipe.recipeName}",
+                        modifier = imageModifier,
+                        error = { R.drawable.baseline_broken_image_24 }
+                    )
+                }
+                Text(
+                    text = stringResource(id = R.string.ingredients),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                for (i in 0 until min(3, recipe.ingredients.size)) {
+                    val ingredient = recipe.ingredients[i]
+                    Text(
+                        text = "• ${ingredient.item} (${ingredient.amount.quantity} ${ingredient.amount.unit})",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
+        }
+        if (uiState == UiState.IsEditing) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Delete",
+                    modifier = modifier.clickable { onRecipeSelected(recipe) })
+            }
+        }
+    }
